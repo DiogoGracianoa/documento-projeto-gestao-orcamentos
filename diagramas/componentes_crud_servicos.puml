@@ -1,0 +1,38 @@
+@startuml comp_painel_auth
+!theme plain
+package "Frontend" {
+  [Módulo Auth] as SPAAuth
+  [Módulo Serviços Admin] as SPAAdmin
+}
+
+package "Backend (.NET API)" {
+  [AuthController]
+  [ServicosController]
+  [LogsController]
+  [AuthMiddleware/JWT]
+  [ServicoService]
+  [ServicoRepository]
+  [LogService]
+  [LogRepository]
+}
+
+database "Banco Postgres" as DB
+node "Storage de Imagens" as Storage
+
+SPAAuth --> AuthController : /auth/login, /auth/refresh
+SPAAdmin --> ServicosController : /services CRUD (Bearer)
+SPAAdmin --> LogsController : /logs (consulta)
+
+ServicosController --> [AuthMiddleware/JWT]
+LogsController --> [AuthMiddleware/JWT]
+
+LogsController --> LogService
+LogService --> LogRepository
+LogRepository --> DB
+ServicosController --> ServicoService
+ServicoService --> ServicoRepository
+ServicoRepository --> DB
+
+ServicoService --> Storage : upload e busca imagens
+
+@enduml

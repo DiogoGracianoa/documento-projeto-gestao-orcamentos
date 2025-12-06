@@ -1,0 +1,64 @@
+@startuml diagrama_er
+!theme plain
+
+entity Categoria {
+  +id: int
+  +nome: string
+  +descricao: string
+}
+
+entity Servico {
+  +id: int
+  +nome: string
+  +descricao: string
+  +unidadeMedida: string
+  +precoBase: decimal
+  +statusPublicacao: bool
+  +dataCriacao: datetime
+  +dataAtualizacao: datetime
+  +valorMinimo: decimal
+  +idCategoria: int
+}
+
+entity ImagemServico {
+  +id: int
+  +idServico: int
+  +url: string
+  +descricao: string
+  +ordemExibicao: int
+}
+
+entity Opcional {
+  +id: int
+  +idServico: int
+  +nome: string
+  +descricao: string
+  +valor: decimal
+}
+
+entity Administrador {
+  +id: int
+  +nome: string
+  +email: string
+  +senhaHash: string
+  +status: bool
+  +dataUltimoAcesso: datetime
+}
+
+entity LogAlteracao {
+  +id: int
+  +entidade: string
+  +idEntidade: int
+  +acao: string
+  +dataAlteracao: datetime
+  +detalhe: string
+  +idAdministrador: int
+}
+
+' relacionamentos
+Categoria ||--o{ Servico : "1:N (classifica)"
+Servico ||--o{ ImagemServico : "1:N (possui)"
+Servico ||--o{ Opcional : "1:N (possui)"
+Administrador ||--o{ LogAlteracao : "1:N (realiza)"
+
+@enduml

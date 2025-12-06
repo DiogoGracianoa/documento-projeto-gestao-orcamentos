@@ -1,0 +1,63 @@
+@startuml diagrama_classes
+!theme plain
+
+class Servico {
+  +id: int
+  +nome: string
+  +descricao: string
+  +unidadeMedida: string
+  +precoBase: decimal
+  +statusPublicacao: bool
+  +dataCriacao: datetime
+  +dataAtualizacao: datetime
+  +valorMinimo: decimal
+  +idCategoria: int
+}
+
+class ImagemServico {
+  +id: int
+  +idServico: int
+  +url: string
+  +descricao: string
+  +ordemExibicao: int
+}
+
+class Opcional {
+  +id: int
+  +idServico: int
+  +nome: string
+  +descricao: string
+  +valor: decimal
+}
+
+class Administrador {
+  +id: int
+  +nome: string
+  +email: string
+  +senhaHash: string
+  +status: bool
+  +dataUltimoAcesso: datetime
+}
+
+class LogAlteracao {
+  +id: int
+  +entidade: string
+  +idEntidade: int
+  +acao: string
+  +dataAlteracao: datetime
+  +detalhe: string
+  +idAdministrador: int
+}
+
+class Categoria {
+  +id: int
+  +nome: string
+  +descricao: string
+}
+
+Categoria "1" -- "N" Servico
+Servico "1" -- "N" ImagemServico
+Servico "1" -- "N" Opcional
+Administrador "1" -- "N" LogAlteracao
+
+@enduml

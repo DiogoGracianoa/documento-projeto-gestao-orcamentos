@@ -1,0 +1,71 @@
+@startuml componentes_unificado
+!theme plain
+
+package "Frontend" {
+  [Catálogo] as Catalogo
+  [Detalhe Serviço] as Detalhe
+  [Simulador] as Simulador
+  [Resumo Estimativa] as Resumo
+  [WhatsApp Link Builder] as WABuilder
+  package "Exclusivo Admin" {
+    [Login Admin] as LoginAdmin
+    [Painel Serviços] as PainelServ
+    [Upload Imagens] as UploadImg
+    [Logs/Auditoria] as PainelLogs
+  }
+}
+
+package "Backend (API .NET)" {
+  [AuthController] as AuthCtl
+  [ServicosController] as ServCtl
+  [SimulacoesController] as SimCtl
+  [LogsController] as LogsCtl
+
+  [AuthMiddlewareJWT] as JWT
+  [ValidadorEntrada] as Validador
+  [SimulacaoService] as SimSvc
+  [ServicoService] as ServSvc
+
+  [ServicoRepository] as ServRepo
+  [OpcionalRepository] as OptRepo
+  [LogRepository] as LogRepo
+}
+
+database "Banco PostgreSQL" as DB
+node "Storage de Imagens" as Storage
+
+
+Catalogo --> ServCtl : GET /services (public)
+Detalhe --> ServCtl : GET /services/{id} (public)
+Simulador --> SimCtl : POST /simulations (public)
+Resumo --> WABuilder : Monta deep link WhatsApp
+
+' exclusivo admin
+LoginAdmin --> AuthCtl : POST /auth/login
+PainelServ --> ServCtl : CRUD /services (Bearer)
+PainelLogs --> LogsCtl : GET /logs (Bearer)
+UploadImg --> ServCtl : POST /services/{id}/images (Bearer)
+
+
+SimCtl --> SimSvc
+SimSvc --> Validador
+SimSvc --> ServRepo
+SimSvc --> OptRepo
+ServCtl --> ServSvc
+ServSvc --> ServRepo
+LogsCtl --> LogRepo
+
+' banco de dados
+ServRepo --> DB
+OptRepo --> DB
+LogRepo --> DB
+
+' img
+ServSvc --> Storage : upload/download
+
+' protecao rotas
+AuthCtl -[hidden]down- JWT
+JWT -[#gray,dashed]-> ServCtl : Protege rotas
+JWT -[#gray,dashed]-> LogsCtl : Protege rotas
+
+@enduml

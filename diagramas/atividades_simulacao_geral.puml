@@ -1,0 +1,49 @@
+@startuml atividade_orcamento_lista
+!theme plain
+
+|Cliente|
+start
+:Abre página de simulação de orçamentos;
+
+repeat
+  :Seleciona um serviço;
+  |Frontend|
+  if (Serviço publicado?) then (Sim)
+    |Frontend|
+    :Renderiza formulário de simulação;
+    repeat
+      |Cliente|
+      :Preenche medidas e opcionais;
+      |Frontend|
+      :Validações locais;
+    repeat while (Entradas válidas?) is (Não) not (Sim)
+    :Adicionar serviço à lista de orçamento;
+  else (Não)
+    :Exibir indisponibilidade e continuar;
+  endif
+|Cliente|
+repeat while (Deseja adicionar outro serviço?) is (Sim) not (Não)
+
+|Frontend|
+:Montar payload com lista de serviços e parâmetros;
+|API Backend|
+:Receber POST /simulations/batch;
+:Iterar sobre lista de serviços;
+:Calcular subtotal individual e total geral;
+:Aplicar valor mínimo (quando houver);
+:Montar resumo com todos os itens e total final;
+
+|Frontend|
+:Renderizar resumo completo (lista + total);
+|Cliente|
+if (Enviar orçamento?) then (Sim)
+  |Frontend|
+  :Gerar deep link / PDF para WhatsApp ou download;
+  :Abrir aplicativo;
+  stop
+else (Não)
+  :Permitir editar ou remover itens;
+  stop
+endif
+
+@enduml

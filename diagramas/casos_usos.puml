@@ -1,0 +1,56 @@
+@startuml casos_usos
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F5F5F5
+  BorderColor #333
+  ArrowColor #555
+}
+
+actor "Cliente" as Cliente
+actor "Administrador" as Admin
+
+rectangle "Catálogo e Simulação" {
+    usecase "Navegar catálogo" as UC01
+    usecase "Ver detalhe do serviço" as UC02
+    usecase "Simular orçamento" as UC03
+    usecase "Contatar empresa" as UC04
+        usecase "Contatar via WhatsApp" as UC041
+        usecase "Contatar via Telefone" as UC042
+}
+
+rectangle "Administração" {
+    usecase "Fazer login" as UC05
+        usecase "Verificar credenciais" as UC051
+        usecase "Exibir mensagem de erro" as UC052
+    usecase "Gerir serviços" as UC06
+        usecase "Adicionar serviço" as UC061
+        usecase "Editar serviço" as UC062
+        usecase "Remover serviço" as UC063
+    usecase "Configurar parâmetros de precificação" as UC07
+    usecase "Visualizar logs de alterações" as UC08
+}
+
+' relacionamentos cliente
+Cliente --> UC01
+Cliente --> UC02
+Cliente --> UC03
+Cliente --> UC04
+
+UC04 <|-- UC041
+UC04 <|-- UC042
+
+' relacionamentos admin
+Admin --> UC05
+Admin --> UC06
+Admin --> UC07
+Admin --> UC08
+
+UC05 --> UC051 : <<include>>
+UC05 --> UC052 : <<extend>>
+UC06 --> UC061 : <<extend>>
+UC06 --> UC062 : <<extend>>
+UC06 --> UC063 : <<extend>>
+
+
+@enduml

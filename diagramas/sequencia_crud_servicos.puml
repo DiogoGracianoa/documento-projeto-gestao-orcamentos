@@ -1,0 +1,54 @@
+@startuml seq_servicos_crud
+!theme plain
+actor Admin
+participant UI as "FrontEnd"
+participant Auth as "Auth"
+participant API as "API .NET (Serviços)"
+database DB as "Banco"
+participant Logs as "Logs/Auditoria"
+
+== Login ==
+Admin -> UI: Acessar Painel
+UI -> Auth: POST /auth/login (email, senha)
+Auth -> DB: SELECT admin + valida hash
+DB --> Auth: admin ok/erro
+Auth --> UI: 200 {accessToken, refreshToken}\n401 inválidas
+UI --> Admin: Sessão iniciada / Erro login
+
+== Listar serviços (com token) ==
+Admin -> UI: Abrir Serviços
+UI -> API: GET /services\nAuthorization: Bearer token
+API -> Auth: Validar token (middleware)
+Auth --> API: OK/401/403
+API -> DB: SELECT serviços
+DB --> API: lista
+API --> UI: 200 lista / 401/403
+UI --> Admin: Renderizar lista
+
+== Editar serviço ==
+Admin -> UI: Salvar edição
+UI -> API: PUT /services/{id}\nAuthorization + JSON
+API -> Auth: Validar token
+Auth --> API: OK
+API -> DB: UPDATE serviço
+API -> Logs: POST /logs (antes/depois)
+Logs --> API: 201
+API --> UI: 200 OK / 400/409
+UI --> Admin: Sucesso/Erros
+
+== Publicar/despublicar ==
+Admin -> UI: Alternar publicar
+UI -> API: PATCH /services/{id}/publish\nAuthorization
+API -> Auth: Validar token
+Auth --> API: OK
+API -> DB: UPDATE statusPublicacao
+API -> Logs: POST /logs
+API --> UI: 200 OK / 409
+UI --> Admin: Estado atualizado/Pendências
+
+== Refresh token (opcional) ==
+... token expirado ...
+UI -> Auth: POST /auth/refresh {refreshToken}
+Auth -> DB: validar refresh
+Auth --> UI: 200 novo accessToken / 401
+@enduml

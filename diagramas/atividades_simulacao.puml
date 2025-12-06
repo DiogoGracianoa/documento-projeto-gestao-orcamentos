@@ -1,0 +1,59 @@
+@startuml atividade_simulador
+!theme plain
+|Cliente|
+start
+:Abre página do serviço;
+|Frontend|
+if (Serviço publicado?) then (Sim)
+  |Cliente|
+  :Clica em "Simular";
+else (Não)
+  |Frontend|
+  :Exibir indisponibilidade e voltar ao catálogo;
+  stop
+endif
+
+|Frontend|
+:Renderiza formulário de simulação;
+repeat
+  |Cliente|
+  :Preenche medidas e opcionais;
+  |Frontend|
+  :Validações locais (campos obrigatórios, números positivos, unidades);
+repeat while (Entradas válidas?) is (Não) not (Sim)
+
+:Montar payload da simulação;
+|API Backend|
+:Receber requisição POST /simulations;
+:Carregar Serviço (preçoBase, unidade, valorMinimo);
+if (Serviço existe e publicado?) then (Não)
+:Responder 404/409 (serviço indisponível);
+|Frontend|
+:Exibir mensagem e retornar ao catálogo;
+stop
+else (Sim)
+  |API Backend|
+  :Calcular subtotal = quantidade * preçoBase;
+  :Somar opcionais (se houver);
+  if (Valor mínimo definido?) then (Sim)
+      :totalFinal = max(subtotal, valorMinimo);
+  else (Não)
+      :totalFinal = subtotal;
+  endif
+  :Montar resumo (itens, unitários, totais, aviso de estimativa);
+  :Responder 200 com JSON do resumo;
+  |Frontend|
+  :Renderizar resumo de estimativa;
+  |Cliente|
+  if (Compartilhar via WhatsApp?) then (Sim)
+    |Frontend|
+    :Gerar deep link com texto da simulação;
+    :Abrir WhatsApp (app/web);
+    stop
+  else (Não)
+    :Permitir nova edição de dados;
+    stop
+  endif
+endif
+
+@enduml

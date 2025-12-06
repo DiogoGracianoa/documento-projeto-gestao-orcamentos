@@ -1,0 +1,66 @@
+@startuml atividades_gerenciar_servicos
+!theme plain
+|Administrador|
+start
+:Abre Painel > Serviços;
+|Frontend|
+:Listar serviços (filtros/ordenação);
+|API|
+:GET /services;
+:Retorna lista;
+|Frontend|
+:Exibir lista;
+
+partition "Criar/Editar" {
+  |Administrador|
+  :Clicar em Novo/Editar;
+  |Frontend|
+  repeat
+    :Preencher campos (nome, descrição, unidade, preçoBase, valorMinimo, imagens, opcionais);
+    :Validações locais (obrigatórios, tipos, limites);
+  repeat while (Entradas válidas?) is (Não) not (Sim)
+  :Montar payload;
+  |API|
+  :POST/services{/{id}};
+  :Validar negócio (unicidade nome, consistência);
+  if (Válido?) then (Não)
+    |API|
+    :Retornar 400 com detalhes;
+    |Frontend|
+    :Exibir erros de servidor;
+    stop
+  else (Sim)
+    |API|
+    :Persistir serviço;
+    :Registrar logs (antes/depois);
+    :Retornar 200/201;
+    |Frontend|
+    :Feedback de sucesso e atualizar lista;
+    stop
+  endif
+}
+
+partition "Publicar/Despublicar" {
+  |Administrador|
+  :Alternar status de publicação;
+  |Frontend|
+  :POST /services/{id}/publish;
+  |API|
+  :Verificar pré-requisitos (mínimos preenchidos);
+  if (OK?) then (Não)
+    :Retornar 400 com pendências;
+    |Frontend|
+    :Exibir pendências;
+    stop
+  else (Sim)
+    |API|
+    :Atualizar statusPublicacao;
+    :Registrar logs;
+    :Retornar 200;
+    |Frontend|
+    :Atualizar estado na lista;
+    stop
+  endif
+}
+
+@enduml

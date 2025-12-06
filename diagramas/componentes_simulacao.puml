@@ -1,0 +1,37 @@
+@startuml comp_simulacao
+!theme plain
+package "Frontend" {
+  [Página Serviço]
+  [Simulador (Form + Resumo)]
+  [WhatsApp Link Builder]
+}
+
+package "Backend (.NET API Pública)" {
+  [ServicosController]
+  [ServicoService]
+  [SimulacoesController]
+  [SimulacaoService]
+  [ValidadorEntrada]
+  [ServicoRepository]
+  [OpcionalRepository]
+}
+
+database "Banco Relacional" as DB
+
+[Página Serviço] --> [ServicosController] : GET /services/{id}
+[Simulador (Form + Resumo)] --> [SimulacoesController] : POST /simulations
+
+[SimulacoesController] --> [SimulacaoService]
+[SimulacaoService] --> [ValidadorEntrada]
+[SimulacaoService] --> [OpcionalRepository]
+[SimulacaoService] --> [ServicoRepository]
+
+[ServicosController] --> [ServicoService]
+[ServicoService] --> [ServicoRepository]
+
+[ServicoRepository] --> DB
+[OpcionalRepository] --> DB
+
+[Simulador (Form + Resumo)] --> [WhatsApp Link Builder] : Montar texto e URL
+
+@enduml

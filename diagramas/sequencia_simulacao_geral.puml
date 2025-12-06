@@ -1,0 +1,40 @@
+@startuml seq_simulacao_batch
+!theme plain
+actor Cliente
+participant UI as "Frontend"
+participant API as "API .NET (Simulação Pública)"
+database DB as "Banco (Serviços e Opcionais)"
+participant Calc as "Módulo de Cálculo"
+participant WA as "WhatsApp (Deep Link)"
+
+== Montagem da lista de serviços ==
+Cliente -> UI: Abrir página de simulador com catálogo de serviços
+UI -> API: GET /services (listar publicados)
+API -> DB: SELECT Serviços publicados
+DB --> API: dados dos serviços
+API --> UI: 200 lista
+UI --> Cliente: Exibe catálogo com botão "Adicionar ao orçamento"
+
+== Preencher formulários individuais ==
+loop Para cada serviço selecionado
+  Cliente -> UI: Preenche medidas e opcionais
+  UI -> UI: Validações locais (obrigatórios, positivos, unidades)
+  UI -> UI: Adicionar serviço à lista de orçamento
+end
+
+== Enviar simulação em lote ==
+Cliente -> UI: Clicar "Simular tudo"
+UI -> API: POST /simulations/batch [{id, medidas, opcionais}...]
+API -> DB: SELECT Serviços e opcionais correspondentes
+DB --> API: dados
+API -> Calc: Iterar lista\nCalcular subtotal, opcionais e valor mínimo por serviço\nSomar total geral
+Calc --> API: resumo {itens, totais individuais, totalGeral, avisos}
+API --> UI: 200 resumo consolidado
+UI --> Cliente: Renderizar resumo completo com total geral
+
+== Compartilhar orçamento ==
+Cliente -> UI: Clicar "Enviar pelo WhatsApp"
+UI -> WA: Gerar e abrir deep link com resumo do orçamento
+WA --> Cliente: App/Web WhatsApp aberto
+
+@enduml

@@ -1,0 +1,33 @@
+@startuml seq_simulacao
+!theme plain
+actor Cliente
+participant UI as "Frontend"
+participant API as "API .NET (Simulação Pública)"
+database DB as "Banco (Serviços e Opcionais)"
+participant Calc as "Módulo de Cálculo"
+participant WA as "WhatsApp (Deep Link)"
+
+== Acessar serviço e iniciar simulação ==
+Cliente -> UI: Abrir página do serviço
+UI -> API: GET /services/{id}
+API -> DB: SELECT Servico (preçoBase, unidade, valorMinimo, publicado)
+DB --> API: dados do serviço
+API --> UI: 200 serviço ou 404/409 indisponível
+UI --> Cliente: Renderiza detalhes e formulário
+
+== Preencher e validar ==
+Cliente -> UI: Informar medidas/opcionais
+UI -> UI: Validações locais (obrigatórios, positivos, unidades)
+UI -> API: POST /simulations {id, medidas, opcionais}
+API -> DB: SELECT Servico + Opcionais
+DB --> API: dados
+API -> Calc: Calcular subtotal (quantidade * preçoBase)\n+ somar opcionais\n+ aplicar valor mínimo se definido
+Calc --> API: resumo {itens, unitários, total, flagValorMinimo}
+API --> UI: 200 resumo ou 400 inválido
+UI --> Cliente: Exibir estimativa e aviso de estimativa
+
+== Compartilhar via WhatsApp (opcional) ==
+Cliente -> UI: Clicar "Enviar pelo WhatsApp"
+UI -> WA: Abrir deep link com texto da simulação
+WA --> Cliente: App/Web WhatsApp aberto
+@enduml

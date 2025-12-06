@@ -1,0 +1,47 @@
+CREATE TABLE servico (
+    id BIGSERIAL PRIMARY KEY,
+    nome TEXT UNIQUE,
+    slug TEXT UNIQUE,
+    descricao TEXT,
+    unidade_medida TEXT,
+    preco_base NUMERIC(12,2) NOT NULL,
+    valor_minimo NUMERIC(12,2),
+    categoria TEXT,
+    status_publicacao BOOLEAN DEFAULT FALSE,
+    data_criacao TIMESTAMPTZ DEFAULT now(),
+    data_atualizacao TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE imagem_servico (
+    id BIGSERIAL PRIMARY KEY,
+    servico_id BIGINT REFERENCES servico(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    descricao TEXT,
+    ordem_exibicao INT DEFAULT 0
+);
+
+CREATE TABLE opcional (
+    id BIGSERIAL PRIMARY KEY,
+    servico_id BIGINT REFERENCES servico(id) ON DELETE CASCADE,
+    nome TEXT NOT NULL,
+    descricao TEXT,
+    valor NUMERIC(12,2) NOT NULL
+);
+
+CREATE TABLE administrador (
+    id BIGSERIAL PRIMARY KEY,
+    nome TEXT,
+    email CITEXT UNIQUE NOT NULL,
+    senha_hash TEXT NOT NULL,
+    status BOOLEAN DEFAULT TRUE,
+    data_ultimo_acesso TIMESTAMPTZ
+);
+
+CREATE TABLE log_alteracao (
+    id BIGSERIAL PRIMARY KEY,
+    entidade TEXT NOT NULL,
+    id_entidade BIGINT NOT NULL,
+    acao TEXT NOT NULL,
+    data_alteracao TIMESTAMPTZ DEFAULT now(),
+    detalhe JSONB
+);
